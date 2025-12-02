@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Video Downloader Premium</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #0f0f0f, #1c1c1c);
+      color: #fff;
+      overflow-x: hidden;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 60px auto;
+      padding: 30px;
+      backdrop-filter: blur(20px);
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 20px;
+      box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      animation: fadeIn 0.8s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    h1 {
+      text-align: center;
+      font-weight: 600;
+      margin-bottom: 10px;
+      font-size: 2rem;
+      animation: slideDown 0.8s ease-out;
+    }
+
+    @keyframes slideDown {
+      from { opacity:0; transform: translateY(-20px); }
+      to { opacity:1; transform: translateY(0); }
+    }
+
+    p.sub {
+      text-align: center;
+      opacity: 0.8;
+      margin-top: 0;
+      font-size: 1rem;
+      animation: fadeIn 1s ease-out;
+    }
+
+    .input-box {
+      margin-top: 25px;
+      display: flex;
+      gap: 10px;
+    }
+
+    input {
+      width: 100%;
+      padding: 15px;
+      border-radius: 14px;
+      border: none;
+      background: rgba(255,255,255,0.15);
+      color: #fff;
+      outline: none;
+      font-size: 1rem;
+      transition: 0.3s;
+    }
+
+    input:focus {
+      background: rgba(255,255,255,0.25);
+    }
+
+    button {
+      background: linear-gradient(135deg, #ff4d4d, #d600ff);
+      border: none;
+      padding: 15px 20px;
+      border-radius: 14px;
+      cursor: pointer;
+      color: #fff;
+      font-weight: 600;
+      transition: 0.3s;
+    }
+
+    button:hover {
+      transform: translateY(-3px) scale(1.03);
+      box-shadow: 0 8px 20px rgba(255, 0, 132, 0.4);
+    }
+
+    .preview-box {
+      margin-top: 30px;
+      padding: 20px;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 15px;
+      display: none;
+      animation: fadeIn 0.5s ease-out;
+    }
+
+    .preview-box img {
+      width: 100%;
+      border-radius: 12px;
+      margin-bottom: 15px;
+      animation: popIn 0.6s ease-out;
+    }
+
+    @keyframes popIn {
+      from { opacity:0; transform: scale(0.9); }
+      to { opacity:1; transform: scale(1); }
+    }
+
+    .download-list button {
+      width: 100%;
+      margin-top: 10px;
+      background: linear-gradient(135deg, #00eaff, #0072ff);
+      border: none;
+      padding: 14px;
+      border-radius: 10px;
+      cursor: pointer;
+      color: #fff;
+      font-weight: 600;
+      animation: fadeIn 0.5s ease-out;
+    }
+
+    .download-list button:hover {
+      transform: scale(1.02);
+    }
+
+    .loader {
+      margin: 25px auto;
+      border: 4px solid rgba(255,255,255,0.2);
+      border-top: 4px solid #fff;
+      border-radius: 50%;
+      width: 45px;
+      height: 45px;
+      animation: spin 0.8s linear infinite;
+      display: none;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* ----------------------------- */
+    /*  MOBILE RESPONSIVE OPTIMIZED */
+    /* ----------------------------- */
+    @media (max-width: 600px) {
+      .container {
+        margin: 20px;
+        padding: 20px;
+        border-radius: 16px;
+      }
+
+      h1 {
+        font-size: 1.6rem;
+      }
+
+      p.sub {
+        font-size: 0.9rem;
+      }
+
+      .input-box {
+        flex-direction: column;
+      }
+
+      button {
+        width: 100%;
+        padding: 14px;
+      }
+
+      input {
+        font-size: 0.95rem;
+        padding: 14px;
+      }
+
+      .download-list button {
+        font-size: 0.9rem;
+        padding: 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Premium Video Downloader</h1>
+    <p class="sub">Instagram • TikTok • Facebook • YouTube</p>
+
+    <div class="input-box">
+      <input id="url" type="text" placeholder="Paste your video link here..." />
+      <button onclick="startDownload()">Go</button>
+    </div>
+
+    <div class="loader" id="loader"></div>
+
+    <div class="preview-box" id="preview">
+      <img id="thumb" src="" />
+      <h3 id="title"></h3>
+
+      <div class="download-list" id="downloadList"></div>
+    </div>
+  </div>
+
+<script>
+async function startDownload() {
+  const url = document.getElementById("url").value;
+  if (!url) return alert("Masukkan URL terlebih dahulu!");
+
+  document.getElementById("loader").style.display = "block";
+  document.getElementById("preview").style.display = "none";
+
+  const res = await fetch("/api/extract", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ url })
+  });
+
+  const data = await res.json();
+
+  document.getElementById("loader").style.display = "none";
+
+  if (!data.sources) return alert("Video tidak ditemukan.");
+
+  // Set preview
+  document.getElementById("thumb").src = data.thumbnail;
+  document.getElementById("title").innerText = data.title || "Untitled Video";
+
+  const listBox = document.getElementById("downloadList");
+  listBox.innerHTML = "";
+
+  data.sources.forEach(s => {
+    const btn = document.createElement("button");
+    btn.innerText = "Download " + s.label;
+    btn.onclick = () => {
+      window.location.href = `/download?url=${encodeURIComponent(s.url)}&title=${encodeURIComponent(data.title)}`;
+    };
+    listBox.appendChild(btn);
+  });
+
+  document.getElementById("preview").style.display = "block";
+}
+</script>
+  <button id="themeToggle" style="position:fixed;bottom:20px;right:20px;padding:12px 16px;border:none;border-radius:12px;background:#fff;color:#000;font-weight:600;cursor:pointer;box-shadow:0 4px 15px rgba(0,0,0,0.3);">Toggle Theme</button>
+<script>
+const toggleBtn = document.getElementById('themeToggle');
+let dark = true;
+toggleBtn.onclick = () => {
+  dark = !dark;
+  if(dark){
+    document.body.style.background = 'linear-gradient(135deg,#0f0f0f,#1c1c1c)';
+    document.body.style.color = '#fff';
+    toggleBtn.style.background = '#fff';
+    toggleBtn.style.color = '#000';
+  } else {
+    document.body.style.background = 'linear-gradient(135deg,#ffffff,#e2e2e2)';
+    document.body.style.color = '#000';
+    toggleBtn.style.background = '#000';
+    toggleBtn.style.color = '#fff';
+  }
+};
+</script>
+</body>
+</html>
