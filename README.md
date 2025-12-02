@@ -176,10 +176,3 @@ Berikut adalah landing page modern yang bisa kamu jadikan halaman depan sebelum 
 
 # 🎯 Semua selesai!
 
-Jika kamu ingin:
-
-* Membuat versi PWA (bisa install jadi aplikasi)
-* Menambah analytics
-* Custom domain + SSL
-
-Cukup bilang saja **"tambahkan fitur lanjutan"**.
